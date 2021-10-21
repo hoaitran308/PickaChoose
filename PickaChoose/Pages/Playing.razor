@@ -2,6 +2,7 @@
 @using PickaChoose.Data
 
 <h3>PickaChoose</h3>
+<p>Time countdown: <span style="color: @(countdownTime < 60 ? "red" : "green")">@(TimeSpan.FromSeconds(@countdownTime).ToString(@"mm\:ss"))</span></p>
 
 @for (int i = 1; i < MaxHeight - 1; i++)
 {
