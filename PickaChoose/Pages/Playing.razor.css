@@ -1,0 +1,11 @@
+﻿.pokemon {
+    border: 1px green solid;
+}
+
+.pokemon:hover {
+    border: 1px red solid;
+}
+
+.picked {
+    filter: brightness(0.5);
+}

@@ -1,0 +1,130 @@
+﻿@page "/playing"
+@using PickaChoose.Data
+
+<h3>PickaChoose</h3>
+
+@for (int i = 0; i <= Height; i++)
+{
+    for (int j = 0; j <= Width; j++)
+    {
+        int x = i;
+        int y = j;
+        if (IsInMap(x, y))
+        {
+            <img @onclick="() => PickThePokemon(x, y)" class="@(IsThePokemonPicked(x, y) ? "pokemon picked" : "pokemon")" src="pokemon/@(pokemon[i, j]).png">
+        }
+        else
+        {
+            <img src="pokemon/blank.png">
+        }
+    }
+    <br />
+}
+
+@code {
+
+    Point[] roadMap = {
+        new Point(-1, 0),
+        new Point(0, 1),
+        new Point(1, 0),
+        new Point(0, -1)
+    };
+
+    Point picked = new Point(-1, -1);
+
+    const int Height = 10;
+    const int Width = 17;
+    const int TotalPokemon = 37;
+
+    Random random = new();
+    int[,] pokemon = new int[Height, Width];
+    int[] pokemonCreated = new int[TotalPokemon];
+
+    protected override void OnInitialized()
+    {
+        for (int i = 1; i < Height; i++)
+        {
+            for (int j = 1; j < Width; j++)
+            {
+                pokemon[i, j] = GetPokemonId();
+            }
+        }
+    }
+
+    private int GetPokemonId()
+    {
+        int pokemonId;
+
+        do
+        {
+            pokemonId = random.Next(1, TotalPokemon);
+        }
+        while (pokemonCreated[pokemonId] == 4);
+
+        pokemonCreated[pokemonId]++;
+
+        return pokemonId;
+    }
+
+    private void PickThePokemon(int x, int y)
+    {
+        this.picked.X = x;
+        this.picked.Y = y;
+    }
+
+    private bool IsThePokemonPicked(int x, int y)
+    {
+        return picked.X == x && picked.Y == y;
+    }
+
+    private bool IsExistPath(Point start, Point end, int stopCount)
+    {
+
+        for (int i = 0; i <= Math.Max(start.X, end.X); i++)
+        {
+            bool isExistPath = true;
+            bool isExistPathStart = true;
+            bool isExistPathEnd = true;
+            for (int j = Math.Min(start.Y, end.Y); j <= Math.Max(start.X, end.X); j++)
+            {
+                if (pokemon[i, j] != 0)
+                {
+                    isExistPath = false;
+                    break;
+                }
+            }
+            for (int j = i; j <= start.X; j++)
+            {
+                if (pokemon[j, start.Y] != 0)
+                {
+                    isExistPathStart = false;
+                    break;
+                }
+            }
+            for (int j = i; j <= end.X; j++)
+            {
+                if (pokemon[j, end.Y] != 0)
+                {
+                    isExistPathEnd = false;
+                    break;
+                }
+            }
+            if (isExistPath && isExistPathStart && isExistPathEnd)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private bool IsInMap(Point point)
+    {
+        return point.X >= 0 && point.X <= Height && point.Y >= 0 && point.Y <= Width;
+    }
+
+    private bool IsInMap(int x, int y)
+    {
+        return x > 0 && x < Height && y > 0 && y < Width;
+    }
+}
