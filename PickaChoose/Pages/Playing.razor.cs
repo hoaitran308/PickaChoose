@@ -1,41 +1,32 @@
 ﻿using Microsoft.AspNetCore.Components;
 using PickaChoose.Data;
 using System;
-using System.Collections.Generic;
 
 namespace PickaChoose.Pages
 {
     public partial class Playing : ComponentBase
     {
-        Point[] roadMap = {
-            new Point(-1, 0),
-            new Point(0, 1),
-            new Point(1, 0),
-            new Point(0, -1)
-        };
-
-        Point picked = new(-1, -1);
-
-        const int Height = 11;
-        const int Width = 18;
+        const int MaxHeight = 11;
+        const int MaxWidth = 18;
         const int TotalPokemon = 37;
 
+        Point picked = new(-1, -1);
         Random random = new();
-        int[,] pokemon = new int[Height, Width];
+        int[,] pokemon = new int[MaxHeight, MaxWidth];
         int[] pokemonCreated = new int[TotalPokemon];
 
         protected override void OnInitialized()
         {
-            for (int i = 1; i < Height - 1; i++)
+            for (int i = 1; i < MaxHeight - 1; i++)
             {
-                for (int j = 1; j < Width - 1; j++)
+                for (int j = 1; j < MaxWidth - 1; j++)
                 {
-                    pokemon[i, j] = GetPokemonId();
+                    pokemon[i, j] = GetRandomPokemon();
                 }
             }
         }
 
-        private int GetPokemonId()
+        private int GetRandomPokemon()
         {
             int pokemonId;
 
@@ -55,17 +46,17 @@ namespace PickaChoose.Pages
             if (picked.X == x && picked.Y == y)
             {
                 picked = new();
+                return;
             }
 
             if (picked.HasValue())
             {
-                IsExistPath(picked, new Point(x, y));
+                FindPathFromStartToEnd(picked, new Point(x, y));
                 picked = new();
                 return;
             }
 
-            picked.X = x;
-            picked.Y = y;
+            picked = new(x, y);
         }
 
         private bool IsThePokemonPicked(int x, int y)
@@ -73,11 +64,11 @@ namespace PickaChoose.Pages
             return picked.X == x && picked.Y == y;
         }
 
-        private bool IsExistPath(Point start, Point end)
+        private void FindPathFromStartToEnd(Point start, Point end)
         {
             if (pokemon[start.X, start.Y] != pokemon[end.X, end.Y])
             {
-                return false;
+                return;
             }
 
             int keepStartPokemon = pokemon[start.X, start.Y];
@@ -85,7 +76,7 @@ namespace PickaChoose.Pages
             pokemon[start.X, start.Y] = 0;
             pokemon[end.X, end.Y] = 0;
 
-            for (int i = 0; i < Height; i++)
+            for (int i = 0; i < MaxHeight; i++)
             {
                 if (!IsExistPathX(i, Math.Min(start.Y, end.Y), Math.Max(start.Y, end.Y))
                     || !IsExistPathY(start.Y, Math.Min(start.X, i), Math.Max(start.X, i))
@@ -94,10 +85,10 @@ namespace PickaChoose.Pages
                     continue;
                 }
 
-                return true;
+                return;
             }
 
-            for(int i = 0; i < Width; i++)
+            for(int i = 0; i < MaxWidth; i++)
             {
                 if (!IsExistPathY(i, Math.Min(start.X, end.X), Math.Max(start.X, end.X))
                     || !IsExistPathX(start.X, Math.Min(start.Y, i), Math.Max(start.Y, i))
@@ -106,25 +97,23 @@ namespace PickaChoose.Pages
                     continue;
                 }
 
-                return true;
+                return;
             }
 
             pokemon[start.X, start.Y] = keepStartPokemon;
             pokemon[end.X, end.Y] = keepEndPokemon;
-
-            return false;
         }
 
         private bool IsExistPathX(int x, int start, int end)
         {
-            if (start == end)
-            {
-                return true;
-            }
-
             if (pokemon[x, start] != 0)
             {
                 return false;
+            }
+
+            if (start == end)
+            {
+                return true;
             }
 
             return IsExistPathX(x, start + 1, end);
@@ -132,31 +121,22 @@ namespace PickaChoose.Pages
 
         private bool IsExistPathY(int y, int start, int end)
         {
-            if (start == end)
-            {
-                return true;
-            }
-
             if (pokemon[start, y] != 0)
             {
                 return false;
             }
 
-            return IsExistPathY(y, start + 1, end);
-        }
-
-        private void HandleCorrectPick(Queue<Point> points)
-        {
-            while (points.Count > 0)
+            if (start == end)
             {
-                Point point = points.Dequeue();
-                pokemon[point.X, point.Y] = 0;
+                return true;
             }
+
+            return IsExistPathY(y, start + 1, end);
         }
 
         private static bool IsInMap(int x, int y)
         {
-            return x > 0 && x < Height - 1 && y > 0 && y < Width - 1;
+            return x > 0 && x < MaxHeight - 1 && y > 0 && y < MaxWidth - 1;
         }
     }
 }
