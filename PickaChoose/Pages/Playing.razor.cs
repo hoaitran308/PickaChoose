@@ -87,24 +87,24 @@ namespace PickaChoose.Pages
 
             for (int i = 0; i < Height; i++)
             {
-                Queue<Point> queuePaths = new();
-
-                if (!IsExistPathY(start.Y, Math.Min(start.X, i), Math.Max(start.X, i), queuePaths))
+                if (!IsExistPathX(i, Math.Min(start.Y, end.Y), Math.Max(start.Y, end.Y))
+                    || !IsExistPathY(start.Y, Math.Min(start.X, i), Math.Max(start.X, i))
+                    || !IsExistPathY(end.Y, Math.Min(end.X, i), Math.Max(end.X, i)))
                 {
                     continue;
                 }
 
-                if (!IsExistPathX(i, Math.Min(start.Y, end.Y), Math.Max(start.Y, end.Y), queuePaths))
+                return true;
+            }
+
+            for(int i = 0; i < Width; i++)
+            {
+                if (!IsExistPathY(i, Math.Min(start.X, end.X), Math.Max(start.X, end.X))
+                    || !IsExistPathX(start.X, Math.Min(start.Y, i), Math.Max(start.Y, i))
+                    || !IsExistPathX(end.X, Math.Min(end.Y, i), Math.Max(end.Y, i)))
                 {
                     continue;
                 }
-
-                if (!IsExistPathY(end.Y, Math.Min(end.X, i), Math.Max(end.X, i), queuePaths))
-                {
-                    continue;
-                }
-
-                HandleCorrectPick(queuePaths);
 
                 return true;
             }
@@ -115,11 +115,10 @@ namespace PickaChoose.Pages
             return false;
         }
 
-        private bool IsExistPathX(int x, int start, int end, Queue<Point> points)
+        private bool IsExistPathX(int x, int start, int end)
         {
             if (start == end)
             {
-                points.Enqueue(new Point(x, start));
                 return true;
             }
 
@@ -128,20 +127,13 @@ namespace PickaChoose.Pages
                 return false;
             }
 
-            if (IsExistPathX(x, start + 1, end, points))
-            {
-                points.Enqueue(new Point(x, start));
-                return true;
-            }
-
-            return false;
+            return IsExistPathX(x, start + 1, end);
         }
 
-        private bool IsExistPathY(int y, int start, int end, Queue<Point> points)
+        private bool IsExistPathY(int y, int start, int end)
         {
             if (start == end)
             {
-                points.Enqueue(new Point(start, y));
                 return true;
             }
 
@@ -150,13 +142,7 @@ namespace PickaChoose.Pages
                 return false;
             }
 
-            if (IsExistPathY(y, start + 1, end, points))
-            {
-                points.Enqueue(new Point(start, y));
-                return true;
-            }
-
-            return false;
+            return IsExistPathY(y, start + 1, end);
         }
 
         private void HandleCorrectPick(Queue<Point> points)
