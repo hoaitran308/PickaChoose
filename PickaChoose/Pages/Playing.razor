@@ -10,14 +10,9 @@
     {
         int x = i;
         int y = j;
-        if (IsInMap(x, y))
-        {
-            <img @onclick="() => PickThePokemon(x, y)" class="@(IsThePokemonPicked(x, y) ? "pokemon picked" : "pokemon")" src="pokemon/@(pokemon[i, j]).png">
-        }
-        else
-        {
-            <img src="pokemon/0.png">
-        }
+        <img src="pokemon/@(pokemon[i, j]).png"
+                class="@(IsThePokemonPicked(x, y) ? "pokemon picked" : "pokemon")"
+                @onclick="() => PickThePokemon(x, y)" >
     }
     <br />
 }

@@ -18,10 +18,12 @@ namespace PickaChoose.Pages
 
         System.Timers.Timer timer;
         int countdownTime;
+        int countdownPokemon;
 
         protected override void OnInitialized()
         {
             countdownTime = 600;
+            countdownPokemon = (MaxHeight - 2) * (MaxWidth - 2);
             isFirstPick = true;
 
             random = new();
@@ -58,11 +60,11 @@ namespace PickaChoose.Pages
         {
             if (isFirstPick)
             {
-                StartCountdownTimer();
+                ChangeStateCountdownTimer();
                 isFirstPick = false;
             }
 
-            if (picked.X == x && picked.Y == y)
+            if (picked.IsEqual(x, y))
             {
                 picked = new();
                 return;
@@ -70,7 +72,14 @@ namespace PickaChoose.Pages
 
             if (picked.HasValue())
             {
-                FindPathFromStartToEnd(picked, new Point(x, y));
+                bool isExistPath = FindPathFromStartToEnd(picked, new Point(x, y));
+
+                countdownPokemon = isExistPath ? countdownPokemon - 2 : countdownPokemon;
+                if (countdownPokemon == 0)
+                {
+                    ChangeStateCountdownTimer();
+                }
+
                 picked = new();
                 return;
             }
@@ -80,14 +89,14 @@ namespace PickaChoose.Pages
 
         private bool IsThePokemonPicked(int x, int y)
         {
-            return picked.X == x && picked.Y == y;
+            return picked.IsEqual(x, y);
         }
 
-        private void FindPathFromStartToEnd(Point start, Point end)
+        private bool FindPathFromStartToEnd(Point start, Point end)
         {
             if (pokemon[start.X, start.Y] != pokemon[end.X, end.Y])
             {
-                return;
+                return false;
             }
 
             int keepStartPokemon = pokemon[start.X, start.Y];
@@ -101,7 +110,7 @@ namespace PickaChoose.Pages
                     && IsExistPathY(start.Y, Math.Min(start.X, i), Math.Max(start.X, i))
                     && IsExistPathY(end.Y, Math.Min(end.X, i), Math.Max(end.X, i)))
                 {
-                    return;
+                    return true;
                 }
             }
 
@@ -111,12 +120,14 @@ namespace PickaChoose.Pages
                     && IsExistPathX(start.X, Math.Min(start.Y, i), Math.Max(start.Y, i))
                     && IsExistPathX(end.X, Math.Min(end.Y, i), Math.Max(end.Y, i)))
                 {
-                    return;
+                    return true;
                 }
             }
 
             pokemon[start.X, start.Y] = keepStartPokemon;
             pokemon[end.X, end.Y] = keepEndPokemon;
+
+            return false;
         }
 
         private bool IsExistPathX(int x, int start, int end)
@@ -149,12 +160,7 @@ namespace PickaChoose.Pages
             return IsExistPathY(y, start + 1, end);
         }
 
-        private static bool IsInMap(int x, int y)
-        {
-            return x > 0 && x < MaxHeight - 1 && y > 0 && y < MaxWidth - 1;
-        }
-
-        private void StartCountdownTimer()
+        private void ChangeStateCountdownTimer()
         {
             if (timer is null)
             {
@@ -164,7 +170,7 @@ namespace PickaChoose.Pages
                     countdownTime--;
                     if (countdownTime <= 0)
                     {
-                        StartCountdownTimer();
+                        ChangeStateCountdownTimer();
                     }
                     InvokeAsync(StateHasChanged);
                 };

@@ -17,9 +17,8 @@
             Y = -1;
         }
 
-        public bool HasValue()
-        {
-            return X != -1 && Y != -1;
-        }
+        public bool HasValue() => X != -1 && Y != -1;
+
+        public bool IsEqual(int x, int y) => X == x && Y == y;
     }
 }
