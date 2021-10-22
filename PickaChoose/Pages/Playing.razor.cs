@@ -99,6 +99,7 @@ namespace PickaChoose.Pages
                 {
                     countdownPokemon -= 2;
                     isShowHint = false;
+                    ResetHintPokemon();
                 }
 
                 if (countdownPokemon == 0)
@@ -106,7 +107,7 @@ namespace PickaChoose.Pages
                     ChangeStateCountdownTimer();
                 }
 
-                if ((hintPokemon = GetHintPokemon()).Key.IsEqual(-1, -1))
+                if (hintPokemon.Key.IsEqual(-1, -1))
                 {
                     SwapPokemon();
                 }
@@ -250,11 +251,18 @@ namespace PickaChoose.Pages
         {
             CountTotalPokemon();
             GeneratePokemon();
+            ResetHintPokemon();
         }
 
         private void OrderHintPokemon()
         {
             isShowHint = true;
+        }
+
+        private void ResetHintPokemon()
+        {
+            hintPokemon = GetHintPokemon();
+            isShowHint = false;
         }
     }
 }

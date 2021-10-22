@@ -11,5 +11,6 @@
 }
 
 .hint {
-    border: 2px red solid;
+    border: 1px red solid;
+    filter: drop-shadow(0 0 0.75rem crimson);
 }

@@ -19,7 +19,7 @@
         int x = i;
         int y = j;
         <img src="pokemon/@(pokemon[i, j]).png"
-             class="pokemon @(IsThePokemonPicked(x, y) ? "picked" : "") @(isShowHint && (hintPokemon.Key.IsEqual(x, y) || hintPokemon.Value.IsEqual(x, y)) ? "hint" : "")"
+             class="pokemon @(IsThePokemonPicked(x, y) ? "picked" : (isShowHint && (hintPokemon.Key.IsEqual(x, y) || hintPokemon.Value.IsEqual(x, y)) ? "hint" : ""))"
              @onclick="() => PickThePokemon(x, y)">
     }
     <br />
