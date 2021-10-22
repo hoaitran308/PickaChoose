@@ -107,7 +107,7 @@ namespace PickaChoose.Pages
                     ChangeStateCountdownTimer();
                 }
 
-                if (hintPokemon.Key.HasValue())
+                if (!hintPokemon.Key.HasValue())
                 {
                     SwapPokemon();
                 }
