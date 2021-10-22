@@ -88,7 +88,7 @@ namespace PickaChoose.Pages
 
                 if (countdownPokemon == 0)
                 {
-                    ChangeStateCountdownTimer();
+                    ResetGame();
                 }
 
                 if (!hintPokemon.Key.HasValue())
@@ -176,9 +176,6 @@ namespace PickaChoose.Pages
             else
             {
                 ResetGame();
-                timer.Stop();
-                timer.Dispose();
-                timer = null;
             }
         }
 
