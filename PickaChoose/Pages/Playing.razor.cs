@@ -7,9 +7,9 @@ namespace PickaChoose.Pages
 {
     public partial class Playing : ComponentBase
     {
-        const int MaxHeight = 11;
-        const int MaxWidth = 18;
-        const int TotalPokemon = 37;
+        const int MaxHeight = 12;
+        const int MaxWidth = 24;
+        const int TotalPokemon = 36;
 
         Random random;
         Point picked;
@@ -27,23 +27,22 @@ namespace PickaChoose.Pages
         protected override void OnInitialized()
         {
             countdownTime = 600;
-            countdownPokemon = (MaxHeight - 2) * (MaxWidth - 2);
+            countdownPokemon = MaxHeight * MaxWidth;
             isFirstPick = true;
 
             random = new();
-            picked = new(-1, -1);
+            picked = new();
             isFirstPick = true;
-            pokemon = new int[MaxHeight, MaxWidth];
-            pokemonCreated = new int[TotalPokemon];
+            pokemon = new int[MaxHeight + 2, MaxWidth + 2];
+            pokemonCreated = new int[TotalPokemon + 1];
 
-            for (int i = 1; i < TotalPokemon; i++)
+            for (int i = 1; i <= TotalPokemon; i++)
             {
-                pokemonCreated[i] = 4;
+                pokemonCreated[i] = MaxHeight * MaxWidth / TotalPokemon;
             }
             GeneratePokemon();
 
-            hintPokemon = GetHintPokemon();
-            isShowHint = false;
+            ResetHintPokemon();
         }
 
         private void GeneratePokemon()
@@ -63,7 +62,7 @@ namespace PickaChoose.Pages
 
             do
             {
-                pokemonId = random.Next(1, TotalPokemon);
+                pokemonId = random.Next(1, TotalPokemon + 1);
             }
             while (pokemonCreated[pokemonId] == 0);
 
@@ -77,8 +76,8 @@ namespace PickaChoose.Pages
             Point point = new();
             do
             {
-                point.X = random.Next(1, MaxHeight - 1);
-                point.Y = random.Next(1, MaxWidth - 1);
+                point.X = random.Next(1, MaxHeight + 1);
+                point.Y = random.Next(1, MaxWidth + 1);
             }
             while (pokemon[point.X, point.Y] != 0);
 
@@ -95,10 +94,9 @@ namespace PickaChoose.Pages
 
             if (picked.HasValue())
             {
-                if (FindPathFromStartToEnd(picked, new Point(x, y)))
+                if (FindPath(picked, new Point(x, y)))
                 {
                     countdownPokemon -= 2;
-                    isShowHint = false;
                     ResetHintPokemon();
                 }
 
@@ -124,9 +122,9 @@ namespace PickaChoose.Pages
             return picked.IsEqual(x, y);
         }
 
-        private bool FindPathFromStartToEnd(Point start, Point end)
+        private bool FindPath(Point start, Point end)
         {
-            if (pokemon[start.X, start.Y] != pokemon[end.X, end.Y] || start.IsEqual(end))
+            if (pokemon[start.X, start.Y] != pokemon[end.X, end.Y] || start.IsEqual(end) || pokemon[start.X, start.Y] == 0)
             {
                 return false;
             }
@@ -136,7 +134,7 @@ namespace PickaChoose.Pages
             pokemon[start.X, start.Y] = 0;
             pokemon[end.X, end.Y] = 0;
 
-            for (int i = 0; i < MaxHeight; i++)
+            for (int i = 0; i <= MaxHeight + 1; i++)
             {
                 if (IsExistPathX(i, Math.Min(start.Y, end.Y), Math.Max(start.Y, end.Y))
                     && IsExistPathY(start.Y, Math.Min(start.X, i), Math.Max(start.X, i))
@@ -146,7 +144,7 @@ namespace PickaChoose.Pages
                 }
             }
 
-            for (int i = 0; i < MaxWidth; i++)
+            for (int i = 0; i <= MaxWidth + 1; i++)
             {
                 if (IsExistPathY(i, Math.Min(start.X, end.X), Math.Max(start.X, end.X))
                     && IsExistPathX(start.X, Math.Min(start.Y, i), Math.Max(start.Y, i))
@@ -200,27 +198,21 @@ namespace PickaChoose.Pages
 
         private KeyValuePair<Point, Point> GetHintPokemon()
         {
-            for (int i = 1; i < MaxHeight - 1; i++)
+            for (int i = 1; i <= MaxHeight; i++)
             {
-                for (int j = 1; j < MaxWidth - 1; j++)
+                for (int j = 1; j <= MaxWidth; j++)
                 {
-                    if (pokemon[i, j] != 0)
+                    for (int k = i; k <= MaxHeight; k++)
                     {
-                        for (int k = i; k < MaxHeight - 1; k++)
+                        for (int l = 1; l <= MaxWidth; l++)
                         {
-                            for (int l = 1; l < MaxWidth - 1; l++)
+                            int keepStartPokemon = pokemon[i, j];
+                            int keepEndPokemon = pokemon[k, l];
+                            if (FindPath(new Point(i, j), new Point(k, l)))
                             {
-                                if (pokemon[k, l] != 0)
-                                {
-                                    int keepStartPokemon = pokemon[i, j];
-                                    int keepEndPokemon = pokemon[k, l];
-                                    if (FindPathFromStartToEnd(new Point(i, j), new Point(k, l)))
-                                    {
-                                        pokemon[i, j] = keepStartPokemon;
-                                        pokemon[k, l] = keepEndPokemon;
-                                        return new(new(i, j), new(k, l));
-                                    }
-                                }
+                                pokemon[i, j] = keepStartPokemon;
+                                pokemon[k, l] = keepEndPokemon;
+                                return new(new(i, j), new(k, l));
                             }
                         }
                     }
@@ -230,12 +222,12 @@ namespace PickaChoose.Pages
             return new(new(), new());
         }
 
-        private void CountTotalPokemon()
+        private void CountAndResetPokemon()
         {
             countdownPokemon = 0;
-            for (int i = 1; i < MaxHeight - 1; i++)
+            for (int i = 1; i <= MaxHeight; i++)
             {
-                for (int j = 1; j < MaxWidth - 1; j++)
+                for (int j = 1; j <= MaxWidth; j++)
                 {
                     if (pokemon[i, j] != 0)
                     {
@@ -249,7 +241,7 @@ namespace PickaChoose.Pages
 
         private void SwapPokemon()
         {
-            CountTotalPokemon();
+            CountAndResetPokemon();
             GeneratePokemon();
             ResetHintPokemon();
         }

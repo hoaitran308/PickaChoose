@@ -12,9 +12,9 @@
     <button class="btn btn-success" @onclick="OrderHintPokemon">Gợi ý</button>
 </p>
 
-@for (int i = 1; i < MaxHeight - 1; i++)
+@for (int i = 1; i <= MaxHeight; i++)
 {
-    for (int j = 1; j < MaxWidth - 1; j++)
+    for (int j = 1; j <= MaxWidth; j++)
     {
         int x = i;
         int y = j;
