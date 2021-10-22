@@ -7,8 +7,9 @@ namespace PickaChoose.Pages
 {
     public partial class Playing : ComponentBase
     {
-        const int MaxHeight = 12;
-        const int MaxWidth = 24;
+        const int MaxTime = 600;
+        const int MaxHeight = 9;
+        const int MaxWidth = 16;
         const int TotalPokemon = 36;
 
         Random random;
@@ -26,33 +27,17 @@ namespace PickaChoose.Pages
 
         protected override void OnInitialized()
         {
-            countdownTime = 600;
-            countdownPokemon = MaxHeight * MaxWidth;
-            isFirstPick = true;
-
-            random = new();
-            picked = new();
-            isFirstPick = true;
-            pokemon = new int[MaxHeight + 2, MaxWidth + 2];
-            pokemonCreated = new int[TotalPokemon + 1];
-
-            for (int i = 1; i <= TotalPokemon; i++)
-            {
-                pokemonCreated[i] = MaxHeight * MaxWidth / TotalPokemon;
-            }
-            GeneratePokemon();
-
-            ResetHintPokemon();
+            ResetGame();
         }
 
         private void GeneratePokemon()
         {
             int totalPokemon = countdownPokemon;
-            while (totalPokemon > 0)
+
+            while (totalPokemon-- > 0)
             {
                 Point point = GetRandomPoint();
                 pokemon[point.X, point.Y] = GetRandomPokemon();
-                totalPokemon--;
             }
         }
 
@@ -74,6 +59,7 @@ namespace PickaChoose.Pages
         private Point GetRandomPoint()
         {
             Point point = new();
+
             do
             {
                 point.X = random.Next(1, MaxHeight + 1);
@@ -189,7 +175,7 @@ namespace PickaChoose.Pages
             }
             else
             {
-                OnInitialized();
+                ResetGame();
                 timer.Stop();
                 timer.Dispose();
                 timer = null;
@@ -255,6 +241,36 @@ namespace PickaChoose.Pages
         {
             hintPokemon = GetHintPokemon();
             isShowHint = false;
+        }
+
+        private void ResetGame()
+        {
+            if (timer is not null)
+            {
+                timer.Stop();
+                timer.Dispose();
+                timer = null;
+            }
+
+            random = new();
+
+            countdownTime = MaxTime;
+            countdownPokemon = MaxHeight * MaxWidth;
+
+            isFirstPick = true;
+            picked = new();
+
+            pokemon = new int[MaxHeight + 2, MaxWidth + 2];
+            pokemonCreated = new int[TotalPokemon + 1];
+
+            for (int i = 1; i <= TotalPokemon; i++)
+            {
+                pokemonCreated[i] = MaxHeight * MaxWidth / TotalPokemon;
+            }
+
+            GeneratePokemon();
+
+            ResetHintPokemon();
         }
     }
 }

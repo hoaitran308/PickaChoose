@@ -8,8 +8,9 @@
             @(TimeSpan.FromSeconds(@countdownTime).ToString(@"mm\:ss"))
         </span>
     </button>
-    <button class="btn btn-danger" @onclick="SwapPokemon">Đổi vị trí</button>
-    <button class="btn btn-success" @onclick="OrderHintPokemon">Gợi ý</button>
+    <button class="btn btn-danger" @onclick="ResetGame">Reset</button>
+    <button class="btn btn-warning" @onclick="SwapPokemon">Swap</button>
+    <button class="btn btn-success" @onclick="OrderHintPokemon">Hint</button>
 </p>
 
 @for (int i = 1; i <= MaxHeight; i++)
