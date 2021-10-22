@@ -32,12 +32,21 @@ namespace PickaChoose.Pages
             pokemon = new int[MaxHeight, MaxWidth];
             pokemonCreated = new int[TotalPokemon];
 
-            for (int i = 1; i < MaxHeight - 1; i++)
+            for (int i = 1; i < TotalPokemon; i++)
             {
-                for (int j = 1; j < MaxWidth - 1; j++)
-                {
-                    pokemon[i, j] = GetRandomPokemon();
-                }
+                pokemonCreated[i] = 4;
+            }
+            GeneratePokemon();
+        }
+
+        private void GeneratePokemon()
+        {
+            int totalPokemon = countdownPokemon;
+            while (totalPokemon > 0)
+            {
+                Point point = GetRandomPoint();
+                pokemon[point.X, point.Y] = GetRandomPokemon();
+                totalPokemon--;
             }
         }
 
@@ -49,11 +58,24 @@ namespace PickaChoose.Pages
             {
                 pokemonId = random.Next(1, TotalPokemon);
             }
-            while (pokemonCreated[pokemonId] == 4);
+            while (pokemonCreated[pokemonId] == 0);
 
-            pokemonCreated[pokemonId]++;
+            pokemonCreated[pokemonId]--;
 
             return pokemonId;
+        }
+
+        private Point GetRandomPoint()
+        {
+            Point point = new();
+            do
+            {
+                point.X = random.Next(1, MaxHeight - 1);
+                point.Y = random.Next(1, MaxWidth - 1);
+            }
+            while (pokemon[point.X, point.Y] != 0);
+
+            return point;
         }
 
         private void PickThePokemon(int x, int y)
@@ -72,9 +94,16 @@ namespace PickaChoose.Pages
 
             if (picked.HasValue())
             {
-                bool isExistPath = FindPathFromStartToEnd(picked, new Point(x, y));
+                if (FindPathFromStartToEnd(picked, new Point(x, y)))
+                {
+                    countdownPokemon -= 2;
 
-                countdownPokemon = isExistPath ? countdownPokemon - 2 : countdownPokemon;
+                    if (!IsExistAnyPath())
+                    {
+                        SwapPokemon();
+                    }
+                }
+
                 if (countdownPokemon == 0)
                 {
                     ChangeStateCountdownTimer();
@@ -94,7 +123,7 @@ namespace PickaChoose.Pages
 
         private bool FindPathFromStartToEnd(Point start, Point end)
         {
-            if (pokemon[start.X, start.Y] != pokemon[end.X, end.Y])
+            if (pokemon[start.X, start.Y] != pokemon[end.X, end.Y] || start.IsEqual(end))
             {
                 return false;
             }
@@ -132,32 +161,12 @@ namespace PickaChoose.Pages
 
         private bool IsExistPathX(int x, int start, int end)
         {
-            if (pokemon[x, start] != 0)
-            {
-                return false;
-            }
-
-            if (start == end)
-            {
-                return true;
-            }
-
-            return IsExistPathX(x, start + 1, end);
+            return pokemon[x, start] == 0 && (start == end || IsExistPathX(x, start + 1, end));
         }
 
         private bool IsExistPathY(int y, int start, int end)
         {
-            if (pokemon[start, y] != 0)
-            {
-                return false;
-            }
-
-            if (start == end)
-            {
-                return true;
-            }
-
-            return IsExistPathY(y, start + 1, end);
+            return pokemon[start, y] == 0 && (start == end || IsExistPathY(y, start + 1, end));
         }
 
         private void ChangeStateCountdownTimer()
@@ -184,6 +193,61 @@ namespace PickaChoose.Pages
                 timer.Dispose();
                 timer = null;
             }
+        }
+
+        private bool IsExistAnyPath()
+        {
+            for (int i = 1; i < MaxHeight - 1; i++)
+            {
+                for (int j = 1; j < MaxWidth - 1; j++)
+                {
+                    if (pokemon[i, j] != 0)
+                    {
+                        for (int k = i; k < MaxHeight - 1; k++)
+                        {
+                            for (int l = 1; l < MaxWidth - 1; l++)
+                            {
+                                if (pokemon[k, l] != 0)
+                                {
+                                    int keepStartPokemon = pokemon[i, j];
+                                    int keepEndPokemon = pokemon[k, l];
+                                    if (FindPathFromStartToEnd(new Point(i, j), new Point(k, l)))
+                                    {
+                                        pokemon[i, j] = keepStartPokemon;
+                                        pokemon[k, l] = keepEndPokemon;
+                                        return true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private void CountTotalPokemon()
+        {
+            countdownPokemon = 0;
+            for (int i = 1; i < MaxHeight - 1; i++)
+            {
+                for (int j = 1; j < MaxWidth - 1; j++)
+                {
+                    if (pokemon[i, j] != 0)
+                    {
+                        pokemonCreated[pokemon[i, j]]++;
+                        pokemon[i, j] = 0;
+                        countdownPokemon++;
+                    }
+                }
+            }
+        }
+
+        private void SwapPokemon()
+        {
+            CountTotalPokemon();
+            GeneratePokemon();
         }
     }
 }
