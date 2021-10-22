@@ -9,3 +9,7 @@
 .picked {
     filter: brightness(0.5);
 }
+
+.hint {
+    border: 2px red solid;
+}

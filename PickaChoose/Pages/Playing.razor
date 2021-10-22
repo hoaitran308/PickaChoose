@@ -8,7 +8,8 @@
             @(TimeSpan.FromSeconds(@countdownTime).ToString(@"mm\:ss"))
         </span>
     </button>
-    <button class="btn btn-warning" @onclick="SwapPokemon">Đổi vị trí</button>
+    <button class="btn btn-danger" @onclick="SwapPokemon">Đổi vị trí</button>
+    <button class="btn btn-success" @onclick="OrderHintPokemon">Gợi ý</button>
 </p>
 
 @for (int i = 1; i < MaxHeight - 1; i++)
@@ -18,7 +19,7 @@
         int x = i;
         int y = j;
         <img src="pokemon/@(pokemon[i, j]).png"
-             class="@(IsThePokemonPicked(x, y) ? "pokemon picked" : "pokemon")"
+             class="pokemon @(IsThePokemonPicked(x, y) ? "picked" : "") @(isShowHint && (hintPokemon.Key.IsEqual(x, y) || hintPokemon.Value.IsEqual(x, y)) ? "hint" : "")"
              @onclick="() => PickThePokemon(x, y)">
     }
     <br />

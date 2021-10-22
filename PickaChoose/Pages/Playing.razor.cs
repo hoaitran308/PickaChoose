@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using PickaChoose.Data;
 using System;
+using System.Collections.Generic;
 
 namespace PickaChoose.Pages
 {
@@ -20,6 +21,9 @@ namespace PickaChoose.Pages
         int countdownTime;
         int countdownPokemon;
 
+        bool isShowHint;
+        KeyValuePair<Point, Point> hintPokemon;
+
         protected override void OnInitialized()
         {
             countdownTime = 600;
@@ -37,6 +41,9 @@ namespace PickaChoose.Pages
                 pokemonCreated[i] = 4;
             }
             GeneratePokemon();
+
+            hintPokemon = GetHintPokemon();
+            isShowHint = false;
         }
 
         private void GeneratePokemon()
@@ -86,27 +93,22 @@ namespace PickaChoose.Pages
                 isFirstPick = false;
             }
 
-            if (picked.IsEqual(x, y))
-            {
-                picked = new();
-                return;
-            }
-
             if (picked.HasValue())
             {
                 if (FindPathFromStartToEnd(picked, new Point(x, y)))
                 {
                     countdownPokemon -= 2;
-
-                    if (!IsExistAnyPath())
-                    {
-                        SwapPokemon();
-                    }
+                    isShowHint = false;
                 }
 
                 if (countdownPokemon == 0)
                 {
                     ChangeStateCountdownTimer();
+                }
+
+                if ((hintPokemon = GetHintPokemon()).Key.IsEqual(-1, -1))
+                {
+                    SwapPokemon();
                 }
 
                 picked = new();
@@ -195,7 +197,7 @@ namespace PickaChoose.Pages
             }
         }
 
-        private bool IsExistAnyPath()
+        private KeyValuePair<Point, Point> GetHintPokemon()
         {
             for (int i = 1; i < MaxHeight - 1; i++)
             {
@@ -215,7 +217,7 @@ namespace PickaChoose.Pages
                                     {
                                         pokemon[i, j] = keepStartPokemon;
                                         pokemon[k, l] = keepEndPokemon;
-                                        return true;
+                                        return new(new(i, j), new(k, l));
                                     }
                                 }
                             }
@@ -224,7 +226,7 @@ namespace PickaChoose.Pages
                 }
             }
 
-            return false;
+            return new(new(), new());
         }
 
         private void CountTotalPokemon()
@@ -248,6 +250,11 @@ namespace PickaChoose.Pages
         {
             CountTotalPokemon();
             GeneratePokemon();
+        }
+
+        private void OrderHintPokemon()
+        {
+            isShowHint = true;
         }
     }
 }
